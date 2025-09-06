@@ -1,99 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/task.dart';
-import '../providers/task_provider.dart';
 
-class TaskTile extends ConsumerWidget {
-  final int index;
+typedef VoidVoid = Future<void> Function();
+
+class TaskTile extends StatelessWidget {
   final Task task;
+  final VoidVoid? onToggle;
+  final VoidCallback? onEdit;
+  final VoidVoid? onDelete;
+  final String? dateText;
 
-  const TaskTile({super.key, required this.index, required this.task});
+  const TaskTile({
+    super.key,
+    required this.task,
+    this.onToggle,
+    this.onEdit,
+    this.onDelete,
+    this.dateText,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      leading: Checkbox(
-        value: task.isCompleted,
-        onChanged: (_) async {
-          final ok = await ref.read(taskProvider.notifier).toggleTask(index);
-          if (!ok && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to toggle task')),
-            );
-          }
-        },
-      ),
-      title: Text(
-        task.title,
-        style: TextStyle(
-          decoration: task.isCompleted ? TextDecoration.lineThrough : TextDecoration.none,
-          fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
         ),
-      ),
-      subtitle: Text(task.description),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            tooltip: 'Edit',
-            icon: const Icon(Icons.edit),
-            onPressed: () => _showEditDialog(context, ref),
+        leading: IconButton(
+          icon: Icon(
+            task.isCompleted
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            color: task.isCompleted ? Colors.green : Colors.grey,
           ),
-          IconButton(
-            tooltip: 'Delete',
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final ok = await ref.read(taskProvider.notifier).deleteTask(index);
-              if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to delete task')),
-                );
-              }
-            },
+          onPressed: () async {
+            if (onToggle != null) await onToggle!();
+          },
+        ),
+        title: Text(
+          task.title,
+          style: TextStyle(
+            decoration: task.isCompleted
+                ? TextDecoration.lineThrough
+                : TextDecoration.none,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context, WidgetRef ref) {
-    final titleController = TextEditingController(text: task.title);
-    final descController = TextEditingController(text: task.description);
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text("Edit Task"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
-              TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-            ElevatedButton(
-              onPressed: () async {
-                final updated = Task(
-                  title: titleController.text.trim(),
-                  description: descController.text.trim(),
-                  isCompleted: task.isCompleted,
-                );
-                final ok = await ref.read(taskProvider.notifier).updateTask(index, updated);
-                if (!ok && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to update task')),
-                  );
-                }
-                if (context.mounted) Navigator.pop(ctx);
-              },
-              child: const Text("Save"),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            task.description.isNotEmpty
+                ? Text(
+                    task.description,
+                    style: TextStyle(
+                      decoration: task.isCompleted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  )
+                : SizedBox.shrink(),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                '⏰ $dateText',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: dateText != null ? Colors.grey : Colors.transparent,
+                ),
+              ),
             ),
           ],
-        );
-      },
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(icon: const Icon(Icons.edit), onPressed: onEdit),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

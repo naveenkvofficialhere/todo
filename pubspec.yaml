@@ -28,14 +28,19 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  # android_alarm_manager_plus: ^4.0.8
+  android_intent_plus: ^5.3.1
   cupertino_icons: ^1.0.8
+  device_info_plus: ^11.5.0
   flutter:
     sdk: flutter
   flutter_local_notifications: ^19.4.1
+  # flutter_native_timezone: ^2.0.0
   flutter_riverpod: ^2.6.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   intl: ^0.20.2
+  permission_handler: ^12.0.1
   timezone: ^0.10.1
 
 dev_dependencies:
@@ -50,6 +55,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1
+  hive_test: ^1.0.1
+  mockito: ^5.4.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'welcome_screen.dart';
 import 'home_screen.dart';
@@ -15,24 +15,25 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), _goNext);
+    Timer(const Duration(milliseconds: 800), _next);
   }
 
-  Future<void> _goNext() async {
-    final box = Hive.box('settings');
-    final seen = box.get('welcome_seen', defaultValue: false) == true;
-
+  Future<void> _next() async {
+    final settings = Hive.box('settings');
+    final seen = settings.get('welcome_seen', defaultValue: false) == true;
     if (seen) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
-      await box.put('welcome_seen', true);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-      );
+      await settings.put('welcome_seen', true);
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+        );
+      }
     }
   }
 
@@ -41,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return const Scaffold(
       body: Center(
         child: Text(
-          "📝 To-Do App",
+          '📝 To-Do',
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
       ),
